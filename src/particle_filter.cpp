@@ -12,8 +12,10 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+#include <map>
 #include <numeric>
 #include <random>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -68,7 +70,8 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
 }
 
 void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
-                                     vector<LandmarkObs>& observations) {
+                                     vector<LandmarkObs>& observations,
+                                     const Map& map_landmarks) {
   /**
    * TODO: Find the predicted measurement that is closest to each
    *   observed measurement and assign the observed measurement to this
@@ -77,6 +80,34 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
    *   probably find it useful to implement this method and use it as a helper
    *   during the updateWeights phase.
    */
+  std::set<int> paired_landmarks;
+  std::map<float, int> distance_map;
+
+  for (unsigned int i = 0; i < observations.size(); ++i) {
+    for (unsigned int j = 0; j < map_landmarks.landmark_list.size(); ++j) {
+      // id not in paired landmarks
+      if (!paired_landmarks.count(map_landmarks.landmark_list[j].id_i)) {
+        float distance = (float)calcDistance(observations[i],
+                                             map_landmarks.landmark_list[j]);
+        distance_map.insert(std::pair<float, int>(
+            distance, map_landmarks.landmark_list[j].id_i));
+      }
+    }
+    // insert the closest landmark
+    paired_landmarks.insert(distance_map.begin()->second);
+    distance_map.clear();
+    // map id starts with 1
+    int index = distance_map.begin()->second - 1;
+    LandmarkObs landmark;
+    landmark.id = map_landmarks.landmark_list[index].id_i;
+    landmark.x = map_landmarks.landmark_list[index].x_f;
+    landmark.y = map_landmarks.landmark_list[index].y_f;
+    predicted.push_back(landmark);
+  }
+}
+
+double calcDistance(LandmarkObs obs, Map::single_landmark_s landmark) {
+  return sqrt(pow(obs.x - landmark.x_f, 2) + pow(obs.y - landmark.y_f, 2));
 }
 
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
@@ -104,8 +135,13 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
           particles[i].x, particles[i].y, particles[i].theta, observations[j].x,
           observations[j].y, observations[j].id));
     }
-    //for each observation find a closest landmark
-    //copy landmark vector, if associated with observation, erase it from the landmark list
+    // for each observation find a closest landmark
+    vector<LandmarkObs> predicted;
+    dataAssociation(predicted, trans_observations, map_landmarks);
+    for (unsigned int i = 0; i < trans_observations.size(); ++i) {
+    }
+    // copy landmark vector, if associated with observation, erase it from the
+    // landmark list
   }
 }
 
