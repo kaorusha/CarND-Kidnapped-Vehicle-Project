@@ -129,7 +129,8 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
   bool closest_landmark_association = true;
   bool print_particle_association = true;
 
-  weights.clear();
+  vector<double>().swap(weights);
+  double weight_sum = 0.0;
   for (int i = 0; i < num_particles; ++i) {
     // transform each observation from local frame into map frame
     vector<LandmarkObs> trans_observations;
@@ -176,16 +177,21 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 
     // update weight
     double weight = 1.0;
-    for (unsigned int i = 0; i < trans_observations.size(); ++i) {
+    for (unsigned int j = 0; j < trans_observations.size(); ++j) {
       // calc multi gauss
       double gauss_norm = 1 / (2 * M_PI * std_landmark[0] * std_landmark[1]);
-      double exponent = (pow(trans_observations[i].x - predicted[i].x, 2) /
+      double exponent = (pow(trans_observations[j].x - predicted[j].x, 2) /
                          (2 * pow(std_landmark[0], 2))) +
-                        (pow(trans_observations[i].y - predicted[i].y, 2) /
+                        (pow(trans_observations[j].y - predicted[j].y, 2) /
                          (2 * pow(std_landmark[1], 2)));
       weight *= gauss_norm * exp(-exponent);
     }
     weights.push_back(weight);
+    weight_sum += weight;
+  }
+  // normalize probability
+  for (int k = 0; k < num_particles; ++k) {
+    weights[k] /= weight_sum;
   }
 }
 
