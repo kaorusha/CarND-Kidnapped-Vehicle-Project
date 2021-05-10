@@ -81,7 +81,7 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
    */
   std::set<int> paired_landmarks;  // assume landmark only corresponds with one
                                    // observation
-  std::map<float, int> distance_map;
+  std::map<double, int> distance_map;
 
   for (unsigned int i = 0; i < observations.size(); ++i) {
     for (unsigned int j = 0; j < predicted.size(); ++j) {
@@ -89,12 +89,13 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
       if (!paired_landmarks.count(predicted[j].id)) {
         double distance = dist(observations[i].x, observations[i].y,
                                predicted[j].x, predicted[j].y);
-        distance_map.insert(std::pair<float, int>(distance, j));
+        distance_map.insert(std::pair<double, int>(distance, j));
       }
     }
     // insert the closest landmark
     int closest_index = distance_map.begin()->second;
-    //std::cout<<"closest distance= "<<distance_map.begin()->first<<" id= "<<distance_map.begin()->second<<std::endl;
+    std::cout<<"closest distance= "<<distance_map.begin()->first<<" id= "<<distance_map.begin()->second<<std::endl;
+    std::cout<<"farest distance= "<<distance_map.end()->first<<" id= "<<distance_map.end()->second<<std::endl;
     paired_landmarks.insert(predicted[closest_index].id);
     // exchange the closest landmark with the ith element
     int id_temp = predicted[i].id;
@@ -108,6 +109,7 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
     predicted[closest_index].y = y_temp;
 
     distance_map.clear();
+    std::cout<<"( "<<predicted[i].x<<", "<<predicted[i].y<<") ";
   }
 }
 
@@ -167,7 +169,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         vector<double> associated_x;
         vector<double> associated_y;
 
-        for (unsigned int m = 0; m < predicted.size(); ++m) {
+        for (unsigned int m = 0; m < trans_observations.size(); ++m) {
           associated_id.push_back(predicted[m].id);
           associated_x.push_back(predicted[m].x);
           associated_y.push_back(predicted[m].y);
