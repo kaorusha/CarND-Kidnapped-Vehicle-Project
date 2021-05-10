@@ -99,6 +99,20 @@ class ParticleFilter {
    * initialized Returns whether particle filter is initialized yet or not.
    */
   const bool initialized() const { return is_initialized; }
+  
+  /**
+   * @brief linear transformation from obj coordinate to target coordinate
+   *
+   * @param origin_x position in target coordinate
+   * @param origin_y position in target coordinate
+   * @param theta angle in rad from target to obj coordinate
+   * @param obj_x position in obj coordinate
+   * @param obj_y position in obj coordinate
+   * @param id observation data id
+   * @return LandmarkObs
+   */
+  LandmarkObs ParticleFilter::homogenousTransform(double origin_x, double origin_y, double theta,
+                                double obj_x, double obj_y, int id);
 
   /**
    * Used for obtaining debugging information related to particles.

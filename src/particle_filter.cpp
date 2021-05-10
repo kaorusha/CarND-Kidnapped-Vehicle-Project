@@ -58,7 +58,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
    *  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
-  for (unsigned int i = 0; i < num_particles; ++i) {
+  for (int i = 0; i < num_particles; ++i) {
     particles[i].x += velocity / yaw_rate *
                       (sin(particles[i].theta + yaw_rate * delta_t) -
                        sin(particles[i].theta));
@@ -130,8 +130,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
   bool print_particle_association = true;
 
   weights.clear();
-  for (unsigned int i = 0; i < num_particles; ++i) {
-
+  for (int i = 0; i < num_particles; ++i) {
     // transform each observation from local frame into map frame
     vector<LandmarkObs> trans_observations;
     for (unsigned int j = 0; j < observations.size(); ++j) {
@@ -170,7 +169,8 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
           associated_x.push_back(predicted[m].x);
           associated_y.push_back(predicted[m].y);
         }
-        SetAssociations(particles[i], associated_id, associated_x, associated_y);
+        SetAssociations(particles[i], associated_id, associated_x,
+                        associated_y);
       }
     }
 
@@ -188,19 +188,11 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     weights.push_back(weight);
   }
 }
-/**
- * @brief linear transformation from obj coordinate to target coordinate
- * 
- * @param origin_x position in target coordinate
- * @param origin_y position in target coordinate
- * @param theta angle in rad from target to obj coordinate
- * @param obj_x position in obj coordinate
- * @param obj_y position in obj coordinate
- * @param id observation data id
- * @return LandmarkObs 
- */
-LandmarkObs homogenousTransform(double origin_x, double origin_y, double theta,
-                                double obj_x, double obj_y, int id) {
+
+LandmarkObs ParticleFilter::homogenousTransform(double origin_x,
+                                                double origin_y, double theta,
+                                                double obj_x, double obj_y,
+                                                int id) {
   LandmarkObs parent_frame;
   parent_frame.x = origin_x + cos(theta) * obj_x - sin(theta) * obj_y;
   parent_frame.y = origin_y + sin(theta) * obj_x - cos(theta) * obj_y;
@@ -220,7 +212,7 @@ void ParticleFilter::resample() {
   int index = distribution(gen);
   double beta = 0.0;
   vector<Particle> resampled;
-  for (unsigned int i = 0; i < num_particles; ++i) {
+  for (int i = 0; i < num_particles; ++i) {
     beta += distribution(gen) / num_particles * 2.0 *
             (*std::max_element(weights.begin(), weights.end()));
     while (weights[index] < beta) {
