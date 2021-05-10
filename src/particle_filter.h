@@ -64,8 +64,7 @@ class ParticleFilter {
    * @param observations Vector of landmark observations
    */
   void dataAssociation(std::vector<LandmarkObs> predicted,
-                       std::vector<LandmarkObs>& observations,
-                       const Map& map_landmarks);
+                       std::vector<LandmarkObs>& observations);
 
   /**
    * updateWeights Updates the weights for each particle based on the likelihood
