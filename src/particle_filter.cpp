@@ -94,7 +94,7 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
     }
     // insert the closest landmark
     int closest_index = distance_map.begin()->second;
-    std::cout<<"closest distance= "<<distance_map.begin()->first<<" id= "<<distance_map.begin()->second<<std::endl;
+    std::cout<<"closest distance= "<<distance_map.begin()->first<<" id= "<<predicted[closest_index].id<<std::endl;
     std::cout<<predicted.size()<<std::endl;
     paired_landmarks.insert(predicted[closest_index].id);
     // exchange the closest landmark with the ith element
@@ -109,7 +109,6 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
     predicted[closest_index].y = y_temp;
 
     distance_map.clear();
-    std::cout<<"( "<<predicted[i].x<<", "<<predicted[i].y<<") ";
   }
 }
 
@@ -190,6 +189,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
                         (pow(trans_observations[j].y - predicted[j].y, 2) /
                          (2 * pow(std_landmark[1], 2)));
       weight *= gauss_norm * exp(-exponent);
+      std::cout<<weight<<", ";
     }
     weights.push_back(weight);
     weight_sum += weight;
@@ -199,9 +199,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
   for (int k = 0; k < num_particles; ++k) {
     weights[k] /= weight_sum;
     particles[k].weight = weights[k];
-    std::cout<<weights[k]<<", ";
   }
-  std::cout<<std::endl;
 }
 
 LandmarkObs ParticleFilter::homogenousTransform(double origin_x,
