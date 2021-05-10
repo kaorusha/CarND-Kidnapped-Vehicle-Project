@@ -33,7 +33,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
    * NOTE: Consult particle_filter.h for more information about this method
    *   (and others in this file).
    */
-  num_particles = 0;  // TODO: Set the number of particles
+  num_particles = 100;  // TODO: Set the number of particles
   std::default_random_engine gen;
   std::normal_distribution<double> dist_x(x, std[0]);
   std::normal_distribution<double> dist_y(y, std[1]);
@@ -94,6 +94,7 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
     }
     // insert the closest landmark
     int closest_index = distance_map.begin()->second;
+    //std::cout<<"closest distance= "<<distance_map.begin()->first<<" id= "<<distance_map.begin()->second<<std::endl;
     paired_landmarks.insert(predicted[closest_index].id);
     // exchange the closest landmark with the ith element
     int id_temp = predicted[i].id;
@@ -134,6 +135,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
   for (int i = 0; i < num_particles; ++i) {
     // transform each observation from local frame into map frame
     vector<LandmarkObs> trans_observations;
+    //std::cout<<"observation size= "<<observations.size()<<std::endl;
     for (unsigned int j = 0; j < observations.size(); ++j) {
       trans_observations.push_back(homogenousTransform(
           particles[i].x, particles[i].y, particles[i].theta, observations[j].x,
@@ -190,9 +192,13 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     weight_sum += weight;
   }
   // normalize probability
+  std::cout<<"weight_sum="<<weight_sum<<std::endl;
   for (int k = 0; k < num_particles; ++k) {
     weights[k] /= weight_sum;
+    particles[k].weight = weights[k];
+    std::cout<<weights[k]<<", ";
   }
+  std::cout<<std::endl;
 }
 
 LandmarkObs ParticleFilter::homogenousTransform(double origin_x,
@@ -201,7 +207,7 @@ LandmarkObs ParticleFilter::homogenousTransform(double origin_x,
                                                 int id) {
   LandmarkObs parent_frame;
   parent_frame.x = origin_x + cos(theta) * obj_x - sin(theta) * obj_y;
-  parent_frame.y = origin_y + sin(theta) * obj_x - cos(theta) * obj_y;
+  parent_frame.y = origin_y + sin(theta) * obj_x + cos(theta) * obj_y;
   parent_frame.id = id;
   return parent_frame;
 }
