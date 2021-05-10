@@ -111,7 +111,7 @@ class ParticleFilter {
    * @param id observation data id
    * @return LandmarkObs
    */
-  LandmarkObs ParticleFilter::homogenousTransform(double origin_x, double origin_y, double theta,
+  LandmarkObs homogenousTransform(double origin_x, double origin_y, double theta,
                                 double obj_x, double obj_y, int id);
 
   /**
