@@ -115,7 +115,7 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
     predicted[closest_index].y = y_temp;
 
     distance_map.clear();
-    std::cout << i << "  obs=( " << observations[i].x << ", " << observations[i].y << ") pred=( " << predicted[i].x << ", " << predicted[i].y << ")" << std::endl;
+    //std::cout << i << "  obs=( " << observations[i].x << ", " << observations[i].y << ") pred=( " << predicted[i].x << ", " << predicted[i].y << ")" << std::endl;
   }
 }
 
@@ -198,6 +198,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     double weight = 1.0;
     for (int j = 0; j < num_observation; ++j)
     {
+      std::cout <<j<<" weight= "<< weight << ", ";
       // calc multi gauss
       double gauss_norm = 1 / (2 * M_PI * std_landmark[0] * std_landmark[1]);
       double exponent = (pow(trans_observations[j].x - predicted[j].x, 2) /
@@ -205,8 +206,8 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
                         (pow(trans_observations[j].y - predicted[j].y, 2) /
                          (2 * pow(std_landmark[1], 2)));
       weight *= gauss_norm * exp(-exponent);
-      std::cout << weight << ", ";
     }
+    std::cout<<""<<std::endl;
     weights.push_back(weight);
     weight_sum += weight;
   }
