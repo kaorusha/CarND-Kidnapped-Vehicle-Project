@@ -73,7 +73,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
   }
 }
 
-void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
+void ParticleFilter::dataAssociation(vector<LandmarkObs> &predicted,
                                      vector<LandmarkObs> &observations)
 {
   /**
@@ -115,7 +115,10 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
     predicted[closest_index].y = y_temp;
 
     distance_map.clear();
-    //std::cout << i << "  obs=( " << observations[i].x << ", " << observations[i].y << ") pred=( " << predicted[i].x << ", " << predicted[i].y << ")" << std::endl;
+  }
+  std::cout<< "dataassociation:"<<std::endl;
+  for(int a =0; a<observations.size(); ++a){
+    std::cout << a << "  obs=( " << observations[a].x << ", " << observations[a].y << ") pred=( " << predicted[a].x << ", " << predicted[a].y << ")" << std::endl;
   }
 }
 
@@ -175,7 +178,10 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     if (closest_landmark_association)
     {
       dataAssociation(predicted, trans_observations);
-
+      for (int a=0; a<num_observation; ++a){
+        
+std::cout << a << "  obs=( " << trans_observations[a].x << ", " << trans_observations[a].y << ") pred=( " << predicted[a].x << ", " << predicted[a].y << ")" << std::endl;
+      }
       // optional print msg
       if (print_particle_association)
       {
@@ -198,14 +204,17 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     double weight = 1.0;
     for (int j = 0; j < num_observation; ++j)
     {
-      std::cout <<j<<" weight= "<< weight << ", ";
+      
       // calc multi gauss
       double gauss_norm = 1 / (2 * M_PI * std_landmark[0] * std_landmark[1]);
       double exponent = (pow(trans_observations[j].x - predicted[j].x, 2) /
                          (2 * pow(std_landmark[0], 2))) +
                         (pow(trans_observations[j].y - predicted[j].y, 2) /
                          (2 * pow(std_landmark[1], 2)));
-      weight *= gauss_norm * exp(-exponent);
+      std::cout<<"x: "<<trans_observations[j].x - predicted[j].x<<", ";
+      std::cout<<"y: "<<trans_observations[j].y - predicted[j].y<<", ";
+      std::cout<< "e: "<< exponent<< ", ";
+      weight *= (gauss_norm * exp(-exponent));
     }
     std::cout<<""<<std::endl;
     weights.push_back(weight);
