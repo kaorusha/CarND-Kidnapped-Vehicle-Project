@@ -95,7 +95,7 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> predicted,
     // insert the closest landmark
     int closest_index = distance_map.begin()->second;
     std::cout<<"closest distance= "<<distance_map.begin()->first<<" id= "<<distance_map.begin()->second<<std::endl;
-    std::cout<<"farest distance= "<<distance_map.end()->first<<" id= "<<distance_map.end()->second<<std::endl;
+    std::cout<<predicted.size()<<std::endl;
     paired_landmarks.insert(predicted[closest_index].id);
     // exchange the closest landmark with the ith element
     int id_temp = predicted[i].id;
@@ -134,11 +134,12 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 
   vector<double>().swap(weights);
   double weight_sum = 0.0;
+  int num_observation = observations.size();
   for (int i = 0; i < num_particles; ++i) {
     // transform each observation from local frame into map frame
     vector<LandmarkObs> trans_observations;
     //std::cout<<"observation size= "<<observations.size()<<std::endl;
-    for (unsigned int j = 0; j < observations.size(); ++j) {
+    for (int j = 0; j < num_observation; ++j) {
       trans_observations.push_back(homogenousTransform(
           particles[i].x, particles[i].y, particles[i].theta, observations[j].x,
           observations[j].y, observations[j].id));
@@ -169,7 +170,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         vector<double> associated_x;
         vector<double> associated_y;
 
-        for (unsigned int m = 0; m < trans_observations.size(); ++m) {
+        for (int m = 0; m < num_observation; ++m) {
           associated_id.push_back(predicted[m].id);
           associated_x.push_back(predicted[m].x);
           associated_y.push_back(predicted[m].y);
@@ -181,7 +182,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 
     // update weight
     double weight = 1.0;
-    for (unsigned int j = 0; j < trans_observations.size(); ++j) {
+    for (int j = 0; j < num_observation; ++j) {
       // calc multi gauss
       double gauss_norm = 1 / (2 * M_PI * std_landmark[0] * std_landmark[1]);
       double exponent = (pow(trans_observations[j].x - predicted[j].x, 2) /
