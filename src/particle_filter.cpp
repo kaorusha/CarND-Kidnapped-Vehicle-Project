@@ -61,8 +61,9 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
    *  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
+  std::cout<<"prediction:"<<std::endl;
   for (int i = 0; i < num_particles; ++i)
-  {
+  { 
     particles[i].x += velocity / yaw_rate *
                       (sin(particles[i].theta + yaw_rate * delta_t) -
                        sin(particles[i].theta));
@@ -70,6 +71,16 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
                       (cos(particles[i].theta) -
                        cos(particles[i].theta + yaw_rate * delta_t));
     particles[i].theta += yaw_rate * delta_t;
+    std::cout<<particles[i].id<<", ";
+    particles[i].id = i;
+    // add random Gaussian noise to motion model
+    std::default_random_engine gen;
+    std::normal_distribution<double> dist_x(particles[i].x, std_pos[0]);
+    std::normal_distribution<double> dist_y(particles[i].y, std_pos[1]);
+    std::normal_distribution<double> dist_theta(particles[i].theta, std_pos[2]);
+    particles[i].x = dist_x(gen);
+    particles[i].y = dist_y(gen);
+    particles[i].theta = dist_theta(gen);
   }
 }
 
@@ -251,6 +262,7 @@ void ParticleFilter::resample()
   int index = distribution(gen);
   double beta = 0.0;
   vector<Particle> resampled;
+  std::cout<<"resample:"<<std::endl;
   for (int i = 0; i < num_particles; ++i)
   {
     beta += (double)(distribution(gen)) / num_particles * 2.0 *
@@ -261,7 +273,9 @@ void ParticleFilter::resample()
       index = (index + 1) % num_particles;
     }
     resampled.push_back(particles[index]);
+    std::cout<<resampled[i].id<<", ";
   }
+  std::cout<<std::endl;
   particles.swap(resampled);
 }
 
