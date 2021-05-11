@@ -188,7 +188,6 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     if (closest_landmark_association)
     {
       dataAssociation(predicted, trans_observations);
-      std::cout<<"pred size= "<<predicted.size()<<"obs size= "<<trans_observations.size()<<std::endl;
       if (print_particle_association)
       {
         vector<int> associated_id;
@@ -223,12 +222,14 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     weight_sum += weight;
   }
   // normalize probability
-  // std::cout << "weight_sum=" << weight_sum << std::endl;
+  std::cout<<"weight= ";
   for (int k = 0; k < num_particles; ++k)
   {
     weights[k] /= weight_sum;
     particles[k].weight = weights[k];
+    std::cout << weights[k] <<", ";
   }
+  std::cout<<std::endl;
 }
 
 LandmarkObs ParticleFilter::homogenousTransform(double origin_x,
