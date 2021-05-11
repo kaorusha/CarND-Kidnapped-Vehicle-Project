@@ -61,7 +61,6 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
    *  http://en.cppreference.com/w/cpp/numeric/random/normal_distribution
    *  http://www.cplusplus.com/reference/random/default_random_engine/
    */
-  std::cout<<"prediction:"<<std::endl;
   for (int i = 0; i < num_particles; ++i)
   { 
     particles[i].x += velocity / yaw_rate *
@@ -71,7 +70,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
                       (cos(particles[i].theta) -
                        cos(particles[i].theta + yaw_rate * delta_t));
     particles[i].theta += yaw_rate * delta_t;
-    std::cout<<particles[i].id<<", ";
+
     particles[i].id = i;
     // add random Gaussian noise to motion model
     std::default_random_engine gen;
@@ -189,11 +188,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     if (closest_landmark_association)
     {
       dataAssociation(predicted, trans_observations);
-      /*for (int a=0; a<num_observation; ++a){
-        
-std::cout << a << "  obs=( " << trans_observations[a].x << ", " << trans_observations[a].y << ") pred=( " << predicted[a].x << ", " << predicted[a].y << ")" << std::endl;
-      }*/
-      // optional print msg
+      std::cout<<"pred size= "<<predicted.size()<<"obs size= "<<trans_observations.size()<<std::endl;
       if (print_particle_association)
       {
         vector<int> associated_id;
@@ -262,7 +257,6 @@ void ParticleFilter::resample()
   int index = distribution(gen);
   double beta = 0.0;
   vector<Particle> resampled;
-  std::cout<<"resample:"<<std::endl;
   for (int i = 0; i < num_particles; ++i)
   {
     beta += (double)(distribution(gen)) / num_particles * 2.0 *
@@ -273,9 +267,7 @@ void ParticleFilter::resample()
       index = (index + 1) % num_particles;
     }
     resampled.push_back(particles[index]);
-    std::cout<<resampled[i].id<<", ";
   }
-  std::cout<<std::endl;
   particles.swap(resampled);
 }
 
