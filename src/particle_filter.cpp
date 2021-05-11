@@ -242,19 +242,32 @@ void ParticleFilter::resample() {
    */
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_int_distribution<> distribution(0, num_particles);
-  int index = distribution(gen);
-  double beta = 0.0;
+  bool use_discrete_distribution = true;
   vector<Particle> resampled;
-  for (int i = 0; i < num_particles; ++i) {
-    beta += (double)(distribution(gen)) / num_particles * 2.0 *
-            (*std::max_element(weights.begin(), weights.end()));
-    while (weights[index] < beta) {
-      beta -= weights[index];
-      index = (index + 1) % num_particles;
+  if (use_discrete_distribution) {
+    std::discrete_distribution<> distribution(weights.begin(), weights.end());
+    int index;
+    for (int i = 0; i < num_particles; ++i) {
+      index = distribution(gen);
+      resampled.push_back(particles[index]);
     }
-    resampled.push_back(particles[index]);
+  } else {
+    // use resampling wheel
+    std::uniform_int_distribution<> distribution(0, num_particles);
+    int index = distribution(gen);
+    double beta = 0.0;
+
+    for (int i = 0; i < num_particles; ++i) {
+      beta += (double)(distribution(gen)) / num_particles * 2.0 *
+              (*std::max_element(weights.begin(), weights.end()));
+      while (weights[index] < beta) {
+        beta -= weights[index];
+        index = (index + 1) % num_particles;
+      }
+      resampled.push_back(particles[index]);
+    }
   }
+
   particles.swap(resampled);
 }
 
