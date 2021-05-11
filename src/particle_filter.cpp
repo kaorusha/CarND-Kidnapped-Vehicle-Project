@@ -116,10 +116,10 @@ void ParticleFilter::dataAssociation(vector<LandmarkObs> &predicted,
 
     distance_map.clear();
   }
-  std::cout<< "dataassociation:"<<std::endl;
+  /*std::cout<< "dataassociation:"<<std::endl;
   for(int a =0; a<observations.size(); ++a){
     std::cout << a << "  obs=( " << observations[a].x << ", " << observations[a].y << ") pred=( " << predicted[a].x << ", " << predicted[a].y << ")" << std::endl;
-  }
+  }*/
 }
 
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
@@ -143,8 +143,8 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
   bool print_particle_association = true;
 
   vector<double>().swap(weights);
-  double weight_sum = 0.0;
   int num_observation = observations.size();
+  double weight_sum = 0.0;
   for (int i = 0; i < num_particles; ++i)
   {
     // transform each observation from local frame into map frame
@@ -178,10 +178,10 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     if (closest_landmark_association)
     {
       dataAssociation(predicted, trans_observations);
-      for (int a=0; a<num_observation; ++a){
+      /*for (int a=0; a<num_observation; ++a){
         
 std::cout << a << "  obs=( " << trans_observations[a].x << ", " << trans_observations[a].y << ") pred=( " << predicted[a].x << ", " << predicted[a].y << ")" << std::endl;
-      }
+      }*/
       // optional print msg
       if (print_particle_association)
       {
@@ -211,17 +211,13 @@ std::cout << a << "  obs=( " << trans_observations[a].x << ", " << trans_observa
                          (2 * pow(std_landmark[0], 2))) +
                         (pow(trans_observations[j].y - predicted[j].y, 2) /
                          (2 * pow(std_landmark[1], 2)));
-      std::cout<<"x: "<<trans_observations[j].x - predicted[j].x<<", ";
-      std::cout<<"y: "<<trans_observations[j].y - predicted[j].y<<", ";
-      std::cout<< "e: "<< exponent<< ", ";
       weight *= (gauss_norm * exp(-exponent));
     }
-    std::cout<<""<<std::endl;
     weights.push_back(weight);
     weight_sum += weight;
   }
   // normalize probability
-  std::cout << "weight_sum=" << weight_sum << std::endl;
+  // std::cout << "weight_sum=" << weight_sum << std::endl;
   for (int k = 0; k < num_particles; ++k)
   {
     weights[k] /= weight_sum;
@@ -249,14 +245,15 @@ void ParticleFilter::resample()
    * NOTE: You may find std::discrete_distribution helpful here.
    *   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
    */
-  std::default_random_engine gen;
-  std::uniform_int_distribution<int> distribution(0, num_particles);
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> distribution(0, num_particles);
   int index = distribution(gen);
   double beta = 0.0;
   vector<Particle> resampled;
   for (int i = 0; i < num_particles; ++i)
   {
-    beta += distribution(gen) / num_particles * 2.0 *
+    beta += (double)(distribution(gen)) / num_particles * 2.0 *
             (*std::max_element(weights.begin(), weights.end()));
     while (weights[index] < beta)
     {
@@ -265,7 +262,7 @@ void ParticleFilter::resample()
     }
     resampled.push_back(particles[index]);
   }
-  particles = resampled;
+  particles.swap(resampled);
 }
 
 void ParticleFilter::SetAssociations(Particle &particle,
