@@ -122,7 +122,7 @@ class ParticleFilter {
 
   // Set of current particles
   std::vector<Particle> particles;
-  void printlog(string msg);
+  void printlog(std::string msg);
  private:
   // Number of particles to draw
   int num_particles;
@@ -133,5 +133,7 @@ class ParticleFilter {
   // Vector of weights of all particles
   std::vector<double> weights;
 };
+
+//#define DEBUG
 
 #endif  // PARTICLE_FILTER_H_

@@ -40,6 +40,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
   std::normal_distribution<double> dist_theta(theta, std[2]);
   for (int i = 0; i < num_particles; ++i) {
     Particle particle;
+    particle.id = i;
     particle.x = dist_x(gen);
     particle.y = dist_y(gen);
     particle.theta = dist_theta(gen);
@@ -153,7 +154,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
    *   (look at equation 3.33) http://planning.cs.uiuc.edu/node99.html
    */
   bool closest_landmark_association = true;
-  bool print_particle_association = false;
+  bool print_particle_association = true;
 
   weights.clear();
   int num_observation = observations.size();
@@ -173,7 +174,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     for (unsigned int k = 0; k < map_landmarks.landmark_list.size(); ++k) {
       if (dist(particles[i].x, particles[i].y,
                map_landmarks.landmark_list[k].x_f,
-               map_landmarks.landmark_list[k].y_f) < sensor_range) {
+               map_landmarks.landmark_list[k].y_f) < sensor_range*1.3) {
         LandmarkObs landmark;
         landmark.id = map_landmarks.landmark_list[k].id_i;
         landmark.x = map_landmarks.landmark_list[k].x_f;
@@ -181,7 +182,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         predicted.push_back(landmark);
       }
     }
-    if(predicted.size()<num_observation)
+    if((int)predicted.size()<num_observation)
       std::cout<<"predicted landmark < obs"<<std::endl;
     // for each observation find a closest landmark
     if (closest_landmark_association) {
@@ -313,19 +314,21 @@ string ParticleFilter::getSenseCoord(Particle best, string coord) {
 }
 
 void ParticleFilter::printlog(string msg){
+#ifdef DEBUG
   std::cout<<msg<<std::endl;
-  if(particles.size() != num_particles)
+  if((int)particles.size() != num_particles)
     std::cout<<"particle size error"<<std::endl;
-  if(weights.size() != num_particles)
+  if((int)weights.size() != num_particles)
     std::cout<<"weight size error"<<std::endl;  
   double max_weight = *std::max_element(weights.begin(),weights.end());
   int max_index = 0;
   for(int i =0; i<num_particles; ++i){
-    if(weights[i] != particles[i].weight)
-      std::cout<<"weight != particle"<<std::endl;
+    //if(weights[i] != particles[i].weight)
+    //  std::cout<<"weight != particle"<<std::endl;
     if(max_weight == weights[i])
       max_index = i;
-    std::cout<<particles[i].id<<"/t"<<particles[i].x<<", "<<particles[i].y<<" weight= "<<particles[i].weight<<std::endl;
+    std::cout<<particles[i].id<<"\t"<<particles[i].x<<", "<<particles[i].y<<" weight= "<<particles[i].weight<<std::endl;
   }
   std::cout<<"max id="<<max_index<<std::endl;
+#endif
 }
