@@ -33,7 +33,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
    * NOTE: Consult particle_filter.h for more information about this method
    *   (and others in this file).
    */
-  num_particles = 100;  // TODO: Set the number of particles
+  num_particles = 20;  // TODO: Set the number of particles
   std::default_random_engine gen;
   std::normal_distribution<double> dist_x(x, std[0]);
   std::normal_distribution<double> dist_y(y, std[1]);
@@ -62,6 +62,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
   std::normal_distribution<double> dist_x(0.0, std_pos[0]);
   std::normal_distribution<double> dist_y(0.0, std_pos[1]);
   std::normal_distribution<double> dist_theta(0.0, std_pos[2]);
+  printlog("enter prediction:");
   for (int i = 0; i < num_particles; ++i) {
     if (fabs(yaw_rate) > 0.0001) {
       particles[i].x += velocity / yaw_rate *
@@ -73,6 +74,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
       particles[i].theta += yaw_rate * delta_t;
     } else {
       // discard yaw_rate noise
+      std::cout<<"small yaw_rate"<<std::endl;
       particles[i].x += velocity * delta_t * cos(particles[i].theta);
       particles[i].y += velocity * delta_t * sin(particles[i].theta);
     }
@@ -84,6 +86,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
     particles[i].y += dist_y(gen);
     particles[i].theta += dist_theta(gen);
   }
+  printlog("end prediction:");
 }
 
 void ParticleFilter::dataAssociation(vector<LandmarkObs> &predicted,
@@ -150,7 +153,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
    *   (look at equation 3.33) http://planning.cs.uiuc.edu/node99.html
    */
   bool closest_landmark_association = true;
-  bool print_particle_association = true;
+  bool print_particle_association = false;
 
   weights.clear();
   int num_observation = observations.size();
@@ -158,7 +161,6 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
   for (int i = 0; i < num_particles; ++i) {
     // transform each observation from local frame into map frame
     vector<LandmarkObs> trans_observations;
-    // std::cout<<"observation size= "<<observations.size()<<std::endl;
     for (int j = 0; j < num_observation; ++j) {
       trans_observations.push_back(homogenousTransform(
           particles[i].x, particles[i].y, particles[i].theta, observations[j].x,
@@ -179,7 +181,8 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
         predicted.push_back(landmark);
       }
     }
-
+    if(predicted.size()<num_observation)
+      std::cout<<"predicted landmark < obs"<<std::endl;
     // for each observation find a closest landmark
     if (closest_landmark_association) {
       dataAssociation(predicted, trans_observations);
@@ -217,6 +220,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     weights[k] /= weight_sum;
     particles[k].weight = weights[k];
   }
+  printlog("end weight update:");
 }
 
 LandmarkObs ParticleFilter::homogenousTransform(double origin_x,
@@ -266,6 +270,7 @@ void ParticleFilter::resample() {
   }
 
   particles=resampled;
+  printlog("end resample:");
 }
 
 void ParticleFilter::SetAssociations(Particle &particle,
@@ -305,4 +310,22 @@ string ParticleFilter::getSenseCoord(Particle best, string coord) {
   string s = ss.str();
   s = s.substr(0, s.length() - 1);  // get rid of the trailing space
   return s;
+}
+
+void ParticleFilter::printlog(string msg){
+  std::cout<<msg<<std::endl;
+  if(particles.size() != num_particles)
+    std::cout<<"particle size error"<<std::endl;
+  if(weights.size() != num_particles)
+    std::cout<<"weight size error"<<std::endl;  
+  double max_weight = *std::max_element(weights.begin(),weights.end());
+  int max_index = 0;
+  for(int i =0; i<num_particles; ++i){
+    if(weights[i] != particles[i].weight)
+      std::cout<<"weight != particle"<<std::endl;
+    if(max_weight == weights[i])
+      max_index = i;
+    std::cout<<particles[i].id<<"/t"<<particles[i].x<<", "<<particles[i].y<<" weight= "<<particles[i].weight<<std::endl;
+  }
+  std::cout<<"max id="<<max_index<<std::endl;
 }

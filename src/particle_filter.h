@@ -122,7 +122,7 @@ class ParticleFilter {
 
   // Set of current particles
   std::vector<Particle> particles;
-
+  void printlog(string msg);
  private:
   // Number of particles to draw
   int num_particles;
