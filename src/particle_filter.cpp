@@ -217,7 +217,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
   for (int k = 0; k < num_particles; ++k) {
     weights[k] /= weight_sum;
     particles[k].weight = weights[k];
-    std::cout << weights[k] << ", ";
+    std::cout << particles[k].weight << ", ";
   }
   std::cout << std::endl;
 }
@@ -269,6 +269,12 @@ void ParticleFilter::resample() {
   }
 
   particles.swap(resampled);
+  // print resampled particle
+  std::cout<<"after resample"<<std::endl;
+  for (int i=0;i<num_particles; ++i){
+    std::cout<<particles[i].weight<<",";
+  }
+  std::cout<<std::endl;
 }
 
 void ParticleFilter::SetAssociations(Particle &particle,
