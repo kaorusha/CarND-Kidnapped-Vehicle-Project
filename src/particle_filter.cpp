@@ -152,7 +152,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
   bool closest_landmark_association = true;
   bool print_particle_association = true;
 
-  vector<double>().swap(weights);
+  weights.clear();
   int num_observation = observations.size();
   double weight_sum = 0.0;
   for (int i = 0; i < num_particles; ++i) {
@@ -213,13 +213,10 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     weight_sum += weight;
   }
   // normalize probability
-  std::cout << "weight= ";
   for (int k = 0; k < num_particles; ++k) {
     weights[k] /= weight_sum;
     particles[k].weight = weights[k];
-    std::cout << particles[k].weight << ", ";
   }
-  std::cout << std::endl;
 }
 
 LandmarkObs ParticleFilter::homogenousTransform(double origin_x,
@@ -268,13 +265,7 @@ void ParticleFilter::resample() {
     }
   }
 
-  particles.swap(resampled);
-  // print resampled particle
-  std::cout<<"after resample"<<std::endl;
-  for (int i=0;i<num_particles; ++i){
-    std::cout<<particles[i].weight<<",";
-  }
-  std::cout<<std::endl;
+  particles=resampled;
 }
 
 void ParticleFilter::SetAssociations(Particle &particle,
