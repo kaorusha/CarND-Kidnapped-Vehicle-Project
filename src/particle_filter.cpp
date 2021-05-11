@@ -73,8 +73,8 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
       particles[i].theta += yaw_rate * delta_t;
     } else {
       // discard yaw_rate noise
-      particles[i].x += velocity * cos(particles[i].theta);
-      particles[i].y += velocity * sin(particles[i].theta);
+      particles[i].x += velocity * delta_t * cos(particles[i].theta);
+      particles[i].y += velocity * delta_t * sin(particles[i].theta);
     }
 
     particles[i].id = i;
